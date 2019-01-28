@@ -16,22 +16,17 @@ const googleOptions = {
 }
 
 const googleLogin = new GoogleStrategy(googleOptions, (accessToken, refreshToken, profile, done) => {
-  // once google is redirected to the callback route passport automatically sends the code to google in exchange
-  // for an access token and the user profile details
-  console.log("accessToken", accessToken); // lets us ask google to modify user's google details
-  console.log("refreshToken", refreshToken); // can optionally be given a refreshToken to update accesstoken after it expires
-  console.log("email", profile.emails[0]["value"])
-
+  const googleID = profile.id;
   const email = profile.emails[0]["value"];
   User
-    .findOne({ email: email })
+    .findOne({ googleID: googleID })
     .then(user => {
       if(user) {
         console.log("Found user")
         done(null, user); // if user is found, call done with no error and the user data
       } else {
         console.log("Need to create user")
-        const user = new User({ email: email });
+        const user = new User({ email: email, googleID: googleID });
         user
           .save()
           .then(() => done(null, user));
