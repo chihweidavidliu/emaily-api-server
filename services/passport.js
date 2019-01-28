@@ -25,7 +25,7 @@ const googleLogin = new GoogleStrategy(googleOptions, (accessToken, refreshToken
         console.log("Found user")
         done(null, user); // if user is found, call done with no error and the user data
       } else {
-        console.log("Need to create user")
+        console.log("Creating new user")
         const user = new User({ email: email, googleID: googleID });
         user
           .save()

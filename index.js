@@ -20,7 +20,6 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false }) // parse req
 app.use(express.static("public")); // middleware that sets up static directory in a folder of your choice - for your pages which don't need to be loaded dynamically
 router(app); // call our router with app
 
-
 // Database setup
 mongoose.Promise = global.Promise; // tell mongoose to use native promise functionality
 mongoose.connect(process.env.MONGODB_URI).catch((err) => {console.log('There was an error', err)}); // don't need to pass in a callback for async connect - mongoose takes care of that - can simply start typing new code below
