@@ -3,14 +3,50 @@ const User = require("../models/user");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const LocalStrategy = require("passport-local");
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
+
+
+// Google OAuth strategy
+
+const googleOptions = {
+  clientID: process.env.GOOGLE_OAUTH_ID,
+  clientSecret: process.env.GOOGLE_OAUTH_SECRET,
+  callbackURL: "/auth/google/callback"
+}
+
+const googleLogin = new GoogleStrategy(googleOptions, (accessToken, refreshToken, profile, done) => {
+  // once google is redirected to the callback route passport automatically sends the code to google in exchange
+  // for an access token and the user profile details
+  console.log("accessToken", accessToken); // lets us ask google to modify user's google details
+  console.log("refreshToken", refreshToken); // can optionally be given a refreshToken to update accesstoken after it expires
+  console.log("email", profile.emails[0]["value"])
+
+  const email = profile.emails[0]["value"];
+  User
+    .findOne({ email: email })
+    .then(user => {
+      if(user) {
+        console.log("Found user")
+        done(null, user); // if user is found, call done with no error and the user data
+      } else {
+        console.log("Need to create user")
+        const user = new User({ email: email });
+        user
+          .save()
+          .then(() => done(null, user));
+      }
+    })
+    .catch(err => done(err, false)); // return error and false if search failed to occur
+});
+
+// Create JwtStrategy
 // Set up options for JwtStrategy to tell it where to extract the jwt from the req etc. and the secret needed to decode it
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromHeader("authorization"),
   secretOrKey: process.env.JWT_SECRET,
 };
 
-// Create JwtStrategy
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => { // the payload is the decoded jwt token with the sub and iat properties
   // see if the userid in the payload exists in our db, if so, call done with that userid
   User
@@ -39,6 +75,7 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
     .catch(err => done(err, false)) // return error and false if search failed to occur
 });
 
-// tell passport to use this strategy
+// tell passport to use these strategies
 passport.use(jwtLogin);
 passport.use(localLogin);
+passport.use(googleLogin);

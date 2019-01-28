@@ -12,7 +12,7 @@ const router = require("./router"); // import router with routes
 
 // App setup / middlewares
 const app = express();
-app.use(morgan("combined")); // logging framework
+// app.use(morgan("combined")); // logging framework
 app.use(cors());
 app.use(helmet()); // protects against various attacks
 app.use(bodyParser.json({ type: "*/*" })); // use bodyParser to parse request as JSON
