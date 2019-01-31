@@ -1,12 +1,12 @@
 // stuff for testing basic routing
-const request = require('supertest');
-const { app } = require('./../index.js');
+const request = require("supertest");
+const { app } = require("./../index.js");
 
 // stuff for testing database
-const { ObjectID } = require('mongodb');
-const mongoose = require('mongoose');
-const User = require('./../models/user.js');
-const { users, populateUsers } = require('./seed/seed.js');
+const { ObjectID } = require("mongodb");
+const mongoose = require("mongoose");
+const User = require("./../models/user.js");
+const { users, populateUsers } = require("./seed/seed.js");
 
 beforeEach(populateUsers);
 
@@ -19,8 +19,8 @@ describe("POST /signup", () => {
       .expect((res) => {
         expect(res.body["token"]).toBeTruthy();
       })
-      .end(done)
-  })
+      .end(done);
+  });
 });
 
 describe("POST /signin", () => {
@@ -32,7 +32,7 @@ describe("POST /signin", () => {
       .expect((res) => {
         expect(res.body["token"]).toBeTruthy();
       })
-      .end(done)
+      .end(done);
   });
 
   it("should send 'Unauthorized' if user details not valid", (done) => {
@@ -40,36 +40,33 @@ describe("POST /signin", () => {
       .post("/signin")
       .send(JSON.stringify({ email: "david@ens-lyon.fr", password: "pd" }))
       .expect((res) => {
-        expect(res.text).toContain("Unauthorized")
+        expect(res.text).toContain("Unauthorized");
       })
-      .end(done)
+      .end(done);
   });
-
 });
 
 describe("GET /protected", () => {
   it("should respond with 'Hi there' if token is valid", (done) => {
-    User.findById(users[0]._id).then(user => {
+    User.findById(users[0]._id).then((user) => {
       const token = user.generateAuthToken();
       request(app)
-        .get('/protected')
-        .set('authorization', token)
+        .get("/protected")
+        .set("authorization", token)
         .expect(200)
         .expect((res) => {
           expect(res.text).toContain("Hi there");
         })
-        .end(done)
-    })
+        .end(done);
+    });
   });
 
   it("should send 'Unauthorized' if user does not send a token", (done) => {
-    User.findById(users[0]._id)
-      .then(user => {
-        request(app)
-          .get("/protected")
-          .expect((res) => expect(res.text).toContain("Unauthorized"))
-          .end(done)
-      })
+    User.findById(users[0]._id).then((user) => {
+      request(app)
+        .get("/protected")
+        .expect((res) => expect(res.text).toContain("Unauthorized"))
+        .end(done);
+    });
   });
-
 });
